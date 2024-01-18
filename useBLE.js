@@ -67,8 +67,10 @@ function useBLE() {
   };
 
   const isDuplicateDevice = (devices, nextDevice) => {
-    devices.findIndex((device) => nextDevice.id === device.id) > -1;
-  }
+    const isDuplicate = devices.some(device => device.id === nextDevice.id);
+    console.log(`Checking for duplicates. Device ID: ${nextDevice.id}, Is Duplicate: ${isDuplicate}`);
+    return isDuplicate;
+  };
 
   const scanForPeripherals = () => 
     bleManager.startDeviceScan(null, null, (error, device) => {
@@ -77,21 +79,30 @@ function useBLE() {
       }
       if (device) {
         setAllDevices((prevState) => {
+          console.log(`Current state: `, prevState.map(d => d.id)); //debugging
           if (!isDuplicateDevice(prevState, device)) {
+            console.log(`Adding device: ${device.id}`); //debugging
             return [...prevState, device] 
+          } else {
+            console.log(`Duplicate found, not adding: ${device.id}`); //debugging
           }
           return prevState;
         })
       }
     })
   
+    setTimeout(() => {
+      bleManager.stopDeviceScan();
+      console.log("Stopped scanning for BLE devices.");
+    }, 10000); // Adjust time as needed
+
 
   return {
     scanForPeripherals,
     requestPermissions,
     allDevices,
   };
-
+ //TODO: Need to figure out how to stop the scan and stop the duplicate devices from being added to the array
   
 }
 

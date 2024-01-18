@@ -30,6 +30,9 @@ const DeviceModalListItem = (props) => {
 const DeviceModal = (props) => {
   const { devices, visible, connectToPeripheral, closeModal } = props;
 
+  //Filter devices to exclude those without a name
+  const validDevices = devices.filter(device => device.name)
+
   const renderDeviceModalListItem = useCallback(
     (item) => {
       return (
@@ -56,7 +59,7 @@ const DeviceModal = (props) => {
         </Text>
         <FlatList
           contentContainerStyle={modalStyle.modalFlatlistContiner}
-          data={devices}
+          data={validDevices}  //Changed from devices to validDevices
           renderItem={renderDeviceModalListItem}
         />
       </SafeAreaView>
