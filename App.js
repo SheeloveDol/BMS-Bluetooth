@@ -1,12 +1,24 @@
 import { useState } from "react";
 
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native"; 
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import DeviceModal from "./DeviceConnectionModal"
+import DeviceModal from "./DeviceConnectionModal";
 import useBLE from "./useBLE";
 
 export default App = () => {
-  const { requestPermissions, scanForPeripherals, allDevices } = useBLE();
+  const {
+    requestPermissions,
+    scanForPeripherals,
+    allDevices,
+    connectToDevice,
+    connectedDevice,
+  } = useBLE();
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -17,43 +29,44 @@ export default App = () => {
     }
   };
 
-
   const hideModal = () => {
     setIsModalVisible(false);
-  }
-
+  };
 
   const openModal = async () => {
     scanForDevices();
     setIsModalVisible(true);
-  }
+  };
 
-  console.log(allDevices)
+  console.log(allDevices);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heartRateTitleWrapper}>
-        <Text style={styles.heartRateTitleText}>
-          Please press the button below to scan for devices
-        </Text>
+        {connectedDevice ? (
+          <>
+            <Text style={styles.heartRateTitleText}>
+              Your current battery voltage is:
+            </Text>
+            <Text style={styles.heartRateText}>{12} volts</Text>
+          </>
+        ) : (
+          <Text style={styles.heartRateTitleText}>
+            Please press the button below to scan for devices
+          </Text>
+        )}
       </View>
-      <TouchableOpacity
-        onPress={openModal}
-        style={styles.ctaButton}
-      >
-        <Text style={styles.ctaButtonText} >
-          Connect
-        </Text>
+      <TouchableOpacity onPress={openModal} style={styles.ctaButton}>
+        <Text style={styles.ctaButtonText}>{connectedDevice ? "Disconnect" : "Connect"}</Text>
       </TouchableOpacity>
       <DeviceModal
         closeModal={hideModal}
         visible={isModalVisible}
-        connectToPeripheral={() => {}}
+        connectToPeripheral={connectToDevice}
         devices={allDevices}
       />
     </SafeAreaView>
-  )
-
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -77,7 +90,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   ctaButton: {
-    backgroundColor: "#FF6060",
+    backgroundColor: "#837e7e",
     justifyContent: "center",
     alignItems: "center",
     height: 50,

@@ -8,6 +8,7 @@ function useBLE() {
   const bleManager = useMemo(() => new BleManager());
 
   const [allDevices, setAllDevices] = useState([]);
+  const [connectedDevice, setConnectedDevice] = useState(null);
 
   const requestAndroid31Permissions = async () => {
     const bluetoothScanPermission = await PermissionsAndroid.request(
@@ -68,41 +69,50 @@ function useBLE() {
 
   const isDuplicateDevice = (devices, nextDevice) => {
     const isDuplicate = devices.some(device => device.id === nextDevice.id);
-    console.log(`Checking for duplicates. Device ID: ${nextDevice.id}, Is Duplicate: ${isDuplicate}`);
+    // console.log(`Checking for duplicates. Device ID: ${nextDevice.id}, Is Duplicate: ${isDuplicate}`);
     return isDuplicate;
   };
 
   const scanForPeripherals = () => 
     bleManager.startDeviceScan(null, null, (error, device) => {
       if (error) {
-        console.log(error)
+        console.log('THIS IS AN ERROR', error)
       }
       if (device) {
         setAllDevices((prevState) => {
-          console.log(`Current state: `, prevState.map(d => d.id)); //debugging
           if (!isDuplicateDevice(prevState, device)) {
-            console.log(`Adding device: ${device.id}`); //debugging
             return [...prevState, device] 
-          } else {
-            console.log(`Duplicate found, not adding: ${device.id}`); //debugging
-          }
+          } 
           return prevState;
         })
       }
     })
   
-    setTimeout(() => {
-      bleManager.stopDeviceScan();
-      console.log("Stopped scanning for BLE devices.");
-    }, 10000); // Adjust time as needed
+    const connectToDevice = async (device) => {
+      try {
+        const deviceConnection = await bleManager.connectToDevice(device.id);
+
+
+        setConnectedDevice(deviceConnection);
+        console.log("I've connected to the device:", deviceConnection), //debugging
+        console.log("Getting ready to stop all scanning"); //debugging
+        bleManager.stopDeviceScan();
+        console.log("STOPPED SCANNING FOR DEVICES"); //debugging
+        await deviceConnection.discoverAllServicesAndCharacteristics();
+      } catch (error) {
+        console.log("<<<<< ERROR CONNECTING TO DEVICE >>>>:", error);
+      }
+    };
 
 
   return {
     scanForPeripherals,
     requestPermissions,
     allDevices,
+    connectToDevice,
+    connectedDevice,
   };
- //TODO: Need to figure out how to stop the scan and stop the duplicate devices from being added to the array
+ 
   
 }
 
