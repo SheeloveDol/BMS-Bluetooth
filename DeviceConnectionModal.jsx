@@ -57,6 +57,8 @@ const DeviceModal = (props) => {
         <Text style={modalStyle.modalTitleText}>
           Tap on a device to connect
         </Text>
+
+        
         <FlatList
           contentContainerStyle={modalStyle.modalFlatlistContiner}
           data={validDevices}  //Changed from devices to validDevices
